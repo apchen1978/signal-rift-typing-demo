@@ -1,0 +1,147 @@
+export type TypingDifficulty = 'easy' | 'normal' | 'hard';
+
+export interface VocabularyNote {
+  term: string;
+  definition: string;
+  translation: string;
+  example: string;
+}
+
+export interface TypingPassage {
+  id: string;
+  difficulty: TypingDifficulty;
+  topic: string;
+  text: string;
+  vocabulary?: VocabularyNote[];
+}
+
+const note = (term: string, definition: string, translation: string, example: string): VocabularyNote => ({ term, definition, translation, example });
+
+export const TYPING_CURRICULUM: TypingPassage[] = [
+  { id: 'easy-bus-stop', difficulty: 'easy', topic: 'daily life', text: 'I got to the bus stop early, so I had time to call my friend.', vocabulary: [note('got to', 'arrived at a place', '到達', 'We got to the movie theater just before the lights went down.'), note('had time to', 'was not too busy to do something', '有時間做某事', 'I had time to finish my homework before dinner.')] },
+  { id: 'easy-school-club', difficulty: 'easy', topic: 'school', text: 'Our science club tried a new idea, and it worked better than we expected.', vocabulary: [note('tried out', 'tested something to see how it works', '試用、嘗試', 'We tried out the new robot after class.'), note('worked out', 'ended successfully', '順利成功', 'The plan worked out even though it looked difficult.')] },
+  { id: 'easy-garden', difficulty: 'easy', topic: 'nature', text: 'The rain let up, and we went outside to look for tiny snails in the garden.', vocabulary: [note('let up', 'became less strong or stopped', '減弱、停下來', 'The wind finally let up after lunch.'), note('look for', 'try to find', '尋找', 'Can you look for my blue notebook?')] },
+  { id: 'easy-game-night', difficulty: 'easy', topic: 'conversation', text: 'That sounds fun, but can we save the last round for tomorrow?', vocabulary: [note('sounds fun', 'seems enjoyable when you hear about it', '聽起來很好玩', 'Your camping trip sounds fun.'), note('save for', 'keep something for a later time', '留到以後', 'Let us save that puzzle for the weekend.')] },
+  { id: 'normal-lab', difficulty: 'normal', topic: 'science', text: 'After a few false starts, the class figured out why the paper bridge kept folding in the middle.', vocabulary: [note('false start', 'an early attempt that does not work', '不成功的開端', 'My first sketch was a false start, but it gave me a better idea.'), note('figure out', 'understand or solve something', '弄懂、解決', 'We figured out how to make the model stronger.'), note('kept folding', 'continued to bend over again and again', '一直折彎', 'The cardboard kept folding until we added tape.')] },
+  { id: 'normal-forest', difficulty: 'normal', topic: 'nature', text: 'We followed the trail until it opened onto a quiet clearing, where sunlight warmed the mossy ground.', vocabulary: [note('opened onto', 'led suddenly to a new place or view', '通向、豁然開到', 'The path opened onto a wide beach.'), note('clearing', 'an open space in a forest', '林中空地', 'We ate our snacks in a clearing between the trees.'), note('mossy', 'covered with soft green moss', '長滿苔蘚的', 'The rocks were damp and mossy after the rain.')] },
+  { id: 'normal-tech', difficulty: 'normal', topic: 'technology', text: 'The app did not load at first, but restarting the tablet cleared up the problem right away.', vocabulary: [note('load', 'open and become ready to use', '載入', 'The video took a moment to load.'), note('clear up', 'solve or make something understandable', '解決、釐清', 'A quick update cleared up the login issue.'), note('right away', 'immediately', '立刻、馬上', 'Please tell me right away if you need help.')] },
+  { id: 'normal-idea', difficulty: 'normal', topic: 'creativity', text: 'When our first design looked too crowded, we stepped back and gave the main idea more room to breathe.', vocabulary: [note('stepped back', 'paused to see a situation more clearly', '退一步重新看', 'We stepped back and noticed the missing piece.'), note('crowded', 'having too much in a small space', '擁擠、太滿', 'The poster felt crowded with so many colors.'), note('room to breathe', 'enough space to feel clear and comfortable', '留白、呼吸空間', 'The new layout gives the photos room to breathe.')] },
+  { id: 'hard-conversation', difficulty: 'hard', topic: 'conversation', text: 'I was not sure I agreed at first, but once you put it that way, your suggestion makes a lot more sense.', vocabulary: [note('put it that way', 'express an idea in a particular manner', '用那種方式說', 'When you put it that way, the choice feels easier.'), note('makes sense', 'seems reasonable or understandable', '有道理', 'Your explanation makes sense to me now.'), note('at first', 'at the beginning', '一開始', 'At first, the new routine felt strange.')] },
+  { id: 'hard-adventure', difficulty: 'hard', topic: 'adventure', text: 'By the time we reached the ridge, the fog had lifted enough for us to see the river winding through the valley below.', vocabulary: [note('by the time', 'when a particular later moment happens', '到…的時候', 'By the time we arrived, the show had started.'), note('ridge', 'a long narrow top of a hill or mountain', '山脊', 'We stopped on the ridge to watch the clouds move.'), note('winding', 'following a path with many turns', '蜿蜒的', 'A winding road led down to the village.')] },
+  { id: 'hard-school', difficulty: 'hard', topic: 'school', text: 'Rather than rushing to finish, our teacher asked us to compare the evidence and explain which conclusion was best supported.', vocabulary: [note('rather than', 'instead of', '而不是', 'Rather than guess, let us check the instructions.'), note('evidence', 'facts that show something is true', '證據', 'The photos gave us evidence that the plant had grown.'), note('supported', 'shown to be likely or true by facts', '被支持、被證實', 'Her answer was supported by the data.')] },
+  { id: 'hard-technology', difficulty: 'hard', topic: 'technology', text: 'The team narrowed down the bug by changing one setting at a time, which made the hidden pattern much easier to spot.', vocabulary: [note('narrow down', 'reduce a list of possibilities', '縮小範圍', 'We narrowed down the choices to two colors.'), note('bug', 'a mistake in a computer program', '程式錯誤', 'The developer fixed a bug in the game.'), note('spot', 'notice or see something', '發現、看出', 'Can you spot the difference between the two pictures?')] },
+  { id: 'hard-policy', difficulty: 'hard', topic: 'society', text: 'The city introduced a congestion charge after a year-long study found that traffic delays were costing local businesses millions of dollars.', vocabulary: [note('congestion charge', 'a fee for driving in a crowded area', '交通壅塞費', 'The congestion charge encourages commuters to use public transport.'), note('year-long', 'continuing for an entire year', '持續一整年的', 'The team completed a year-long survey.'), note('costing', 'causing someone to lose money or resources', '使付出代價', 'The delay is costing the company valuable time.')] },
+  { id: 'hard-research', difficulty: 'hard', topic: 'science', text: 'Although the findings are preliminary, they point to a promising connection between regular sleep and the brain\'s ability to consolidate new memories.', vocabulary: [note('preliminary', 'not final and likely to change', '初步的', 'The researchers released preliminary results.'), note('point to', 'suggest that something is likely', '指向、顯示', 'The evidence points to a change in customer habits.'), note('consolidate', 'make something stronger or more permanent', '鞏固、加深', 'Review helps students consolidate what they have learned.')] },
+  { id: 'hard-remote-work', difficulty: 'hard', topic: 'technology', text: 'Remote work has made collaboration more flexible, but it also requires teams to be deliberate about documenting decisions that once happened informally.', vocabulary: [note('collaboration', 'the act of working together', '合作', 'The project depended on close collaboration between the two offices.'), note('be deliberate about', 'make a careful and intentional effort to do something', '刻意、審慎地做', 'We need to be deliberate about protecting customer data.'), note('informally', 'in a relaxed way without official structure', '非正式地', 'The two managers spoke informally after the meeting.')] },
+  { id: 'hard-climate', difficulty: 'hard', topic: 'nature', text: 'Restoring wetlands can reduce the impact of flooding while creating habitats for wildlife, which is why conservation groups are urging municipalities to act.', vocabulary: [note('wetland', 'land covered or saturated with water', '濕地', 'The wetland provides shelter for migrating birds.'), note('habitat', 'the natural home of a plant or animal', '棲息地', 'The project protects a rare habitat.'), note('urge', 'strongly encourage someone to act', '敦促', 'Doctors urge people to stay hydrated during heat waves.')] },
+  { id: 'hard-economy', difficulty: 'hard', topic: 'business', text: 'Rather than cutting staff immediately, the company froze new hiring and streamlined its supply chain to weather a period of uncertain demand.', vocabulary: [note('freeze hiring', 'temporarily stop employing new people', '暫停招募', 'The startup froze hiring until its next funding round.'), note('streamline', 'make a process simpler and more efficient', '精簡、使有效率', 'We streamlined the approval process.'), note('weather', 'successfully survive a difficult situation', '度過、撐過', 'Small businesses are trying to weather the downturn.')] },
+  { id: 'hard-education', difficulty: 'hard', topic: 'school', text: 'Students tend to retain concepts more effectively when they explain an idea in their own words instead of merely memorizing a textbook definition.', vocabulary: [note('retain', 'keep information in your memory', '保留、記住', 'Short reviews help learners retain new vocabulary.'), note('in their own words', 'using personal language rather than repeating a source', '用自己的話', 'Explain the argument in your own words.'), note('merely', 'only; simply', '僅僅、只是', 'The task requires reasoning, not merely copying.')] },
+  { id: 'hard-interview', difficulty: 'hard', topic: 'conversation', text: 'When asked about the setback, the candidate acknowledged what went wrong, then outlined the safeguards they had put in place to prevent a repeat.', vocabulary: [note('setback', 'a problem that delays progress', '挫折、阻礙', 'The unexpected repair was a temporary setback.'), note('acknowledge', 'accept or admit that something is true', '承認、確認', 'She acknowledged the concern before proposing a solution.'), note('put in place', 'establish or arrange something', '建立、落實', 'The school put new safety rules in place.')] },
+  { id: 'hard-media', difficulty: 'hard', topic: 'conversation', text: 'It is easy for a headline to go viral before anyone checks the source, so readers should distinguish between a compelling claim and credible evidence.', vocabulary: [note('go viral', 'spread rapidly online', '在網路上快速傳播', 'The short video went viral overnight.'), note('distinguish between', 'recognize the difference between two things', '區分', 'Children should learn to distinguish between fact and opinion.'), note('credible', 'believable and trustworthy', '可信的', 'The report cites several credible sources.')] },
+  { id: 'hard-innovation', difficulty: 'hard', topic: 'creativity', text: 'Innovation rarely follows a straight line; teams often make their biggest breakthrough after an unexpected failure exposes an assumption they had overlooked.', vocabulary: [note('straight line', 'a simple, direct path with no major changes', '直線、直接路徑', 'Career growth does not always follow a straight line.'), note('breakthrough', 'an important discovery or achievement', '突破', 'The experiment led to a scientific breakthrough.'), note('overlook', 'fail to notice something', '忽略、未注意到', 'We overlooked one detail in the contract.')] },
+  { id: 'hard-ai', difficulty: 'hard', topic: 'technology', text: 'As artificial intelligence becomes easier to access, the most valuable skill may be knowing when a polished answer still requires careful human judgment.', vocabulary: [note('easier to access', 'more available for people to use', '更容易取得', 'Online courses have made expert advice easier to access.'), note('polished', 'well-presented and apparently complete', '精緻的、潤飾過的', 'The proposal sounded polished but lacked evidence.'), note('human judgment', 'a person\'s careful decision-making', '人的判斷力', 'Sensitive decisions still require human judgment.')] },
+  { id: 'hard-ocean', difficulty: 'hard', topic: 'nature', text: 'Marine researchers are tracking changes in ocean temperature because even a small shift can disrupt migration patterns and affect an entire food chain.', vocabulary: [note('track', 'observe and record changes over time', '追蹤', 'Scientists track the storm as it moves offshore.'), note('disrupt', 'interrupt the normal progress of something', '擾亂、中斷', 'A missing part can disrupt the whole production line.'), note('food chain', 'the sequence of living things that feed on one another', '食物鏈', 'Plastic pollution can damage the marine food chain.')] },
+  { id: 'hard-finance', difficulty: 'hard', topic: 'business', text: 'Investors responded cautiously to the quarterly report, noting that strong revenue growth was offset by rising operating costs and a weaker forecast.', vocabulary: [note('cautiously', 'in a careful way because of possible risks', '謹慎地', 'The board responded cautiously to the proposal.'), note('offset', 'balance or reduce the effect of something', '抵銷、平衡', 'Lower energy use offset part of the higher rent.'), note('forecast', 'a prediction about future events or results', '預測', 'The latest forecast suggests slower growth.')] },
+  { id: 'hard-culture', difficulty: 'hard', topic: 'conversation', text: 'A thoughtful exchange does not require everyone to share the same opinion; it requires participants to listen closely enough to understand why they disagree.', vocabulary: [note('thoughtful', 'showing careful consideration', '深思熟慮的', 'She gave a thoughtful response to the criticism.'), note('exchange', 'a conversation or sharing of ideas', '交流', 'The conference encouraged an exchange of perspectives.'), note('disagree', 'have a different opinion', '不同意', 'It is possible to disagree without being disrespectful.')] },
+  { id: 'hard-urban', difficulty: 'hard', topic: 'society', text: 'Well-designed public spaces can strengthen a neighborhood by giving residents a reason to linger, interact, and take pride in the place they share.', vocabulary: [note('linger', 'stay somewhere longer than necessary', '逗留', 'Visitors lingered in the square after the concert.'), note('residents', 'people who live in a place', '居民', 'Residents asked for safer crossings.'), note('take pride in', 'feel pleased about and responsible for something', '以…為榮', 'The volunteers take pride in keeping the park clean.')] },
+  { id: 'hard-study', difficulty: 'hard', topic: 'school', text: 'Effective study is less about spending endless hours at a desk and more about alternating focused practice with enough rest for the brain to recover.', vocabulary: [note('endless', 'continuing without stopping or appearing to end', '無止境的', 'The endless notifications made it hard to focus.'), note('alternate', 'take turns between two activities or states', '交替', 'Alternate reading with short speaking practice.'), note('recover', 'return to a normal condition after effort', '恢復', 'The body needs time to recover after intense exercise.')] },
+  { id: 'hard-space', difficulty: 'hard', topic: 'science', text: 'The telescope captured a faint signal from a distant galaxy, offering astronomers another clue about how massive structures formed in the early universe.', vocabulary: [note('faint', 'not strong, clear, or easy to see', '微弱的、模糊的', 'We heard a faint sound from the next room.'), note('distant', 'far away in space or time', '遙遠的', 'The mountain looked distant through the haze.'), note('formed', 'developed or came into existence', '形成', 'The mineral formed under extreme pressure.')] },
+  { id: 'hard-ethics', difficulty: 'hard', topic: 'technology', text: 'Before deploying the update, the engineers tested how the system handled unusual requests, since reliability matters most when users cannot predict every scenario.', vocabulary: [note('deploy', 'put a system or product into active use', '部署、上線', 'The team will deploy the update tonight.'), note('unusual', 'different from what is common or expected', '不尋常的', 'The sensor detected unusual activity.'), note('reliability', 'the quality of working consistently well', '可靠性', 'Reliability is essential in medical equipment.')] },
+  { id: 'hard-travel', difficulty: 'hard', topic: 'adventure', text: 'The guide warned us that the route was demanding, but the changing landscape made the long climb worthwhile once the valley came into view.', vocabulary: [note('demanding', 'requiring a lot of effort or skill', '要求高的、費力的', 'The course is demanding but rewarding.'), note('worthwhile', 'valuable enough to justify the effort', '值得的', 'The extra practice was worthwhile.'), note('came into view', 'became visible', '映入眼簾', 'The lighthouse came into view after the bend.')] },
+  { id: 'hard-global', difficulty: 'hard', topic: 'society', text: 'International teams often move faster when they make expectations explicit, especially when a phrase that sounds polite in one culture may seem vague in another.', vocabulary: [note('make explicit', 'state something clearly rather than leaving it implied', '說清楚、明確化', 'The contract makes the delivery dates explicit.'), note('expectations', 'beliefs about what should happen', '期待、預期', 'Clear expectations prevent confusion.'), note('vague', 'not specific or clearly expressed', '模糊的', 'The instructions were too vague to follow.')] },
+  { id: 'hard-evidence', difficulty: 'hard', topic: 'science', text: 'The review found no single explanation for the decline, but several independent studies pointed in the same direction and strengthened the overall case.', vocabulary: [note('independent', 'not controlled or influenced by another person or group', '獨立的', 'The claim was confirmed by an independent review.'), note('pointed in the same direction', 'gave similar evidence or suggestions', '指向相同方向', 'The interviews pointed in the same direction.'), note('overall case', 'the complete argument supported by available facts', '整體論據', 'The new data strengthens the overall case for reform.')] },
+];
+
+const LEGACY_PASSAGE_TEXTS = [
+  'Small steps every day can build a skill that feels impossible at first.',
+  'A curious mind asks questions, tries again, and learns from each mistake.',
+  'The brightest ideas often begin with a quiet moment and an open notebook.',
+  'Practice helps your fingers find the right keys without slowing your thoughts.',
+  'A good game gives you one clear goal and a reason to play one more round.',
+  'The little fox followed a silver trail through the quiet forest.',
+  'Every morning, the birds sing while the sunlight reaches the garden.',
+  'A brave explorer packs a map, a snack, and plenty of curiosity.',
+  'The blue whale swims slowly beneath the waves and listens to the sea.',
+  'After school, we can read a book, draw a picture, or build a new game.',
+  'Good friends listen carefully, share their ideas, and help each other grow.',
+  'The moon looks small from Earth, but it is a huge world in the night sky.',
+  'A tiny seed needs water, sunlight, and time before it becomes a tall tree.',
+  'Learning a new word is like finding another key to a secret door.',
+  'The robot checked every button before starting its journey across Mars.',
+  'Rain tapped softly on the window while the family played a board game.',
+  'When the puzzle feels difficult, take a breath and try one piece at a time.',
+  'The fastest player is not always the winner; careful choices matter too.',
+  'Our class made paper rockets and tested which design could fly the farthest.',
+  'Imagination can turn a cardboard box into a castle, a ship, or a spaceship.',
+  'The sleepy panda climbed into the tree and found a cool place to rest.',
+  'We watched orange clouds drift across the sky as the sun went down.',
+  'The young chef mixed flour, eggs, and milk to make pancakes for breakfast.',
+  'A friendly dog waited by the gate and wagged its tail when we came home.',
+  'The library was quiet, but every book was filled with exciting adventures.',
+  'Our team built a strong bridge by testing each idea and working together.',
+  'The green turtle moved slowly across the sand toward the shining ocean.',
+  'Music can make a rainy afternoon feel warm, bright, and full of energy.',
+  'The astronaut looked through the window and saw Earth glowing far below.',
+  'We planted colorful flowers so bees and butterflies could visit our yard.',
+  'A clear plan makes a difficult project easier to understand and finish.',
+  'The kitten chased a ball of yarn until it rolled beneath the wooden chair.',
+  'Before crossing the road, stop at the corner and look in both directions.',
+  'The mountain path was steep, so the hikers walked slowly and stayed together.',
+  'A kind word can help someone feel stronger during a difficult day.',
+  'The old clock rang at noon while people hurried through the busy town square.',
+  'We used a flashlight to search the dark cave for sparkling stones.',
+  'The soccer player passed the ball quickly and created space for the team.',
+  'Reading every day can improve your vocabulary, focus, and imagination.',
+  'The best inventions often begin when someone notices a simple problem.',
+  'Mina folded a paper boat and sailed it across a puddle after the rain.',
+  'The science club used magnets to discover which objects could move without touch.',
+  'At the market, we chose sweet mangoes, crunchy carrots, and fresh bread.',
+  'The owl stayed quiet on its branch until the stars appeared above the trees.',
+  'A patient builder checks each block before adding the next part of a tower.',
+  'The river carried tiny leaves past smooth rocks and under the old bridge.',
+  'We made a list of questions before visiting the aquarium on Saturday.',
+  'A map does not tell every answer, but it helps an explorer choose a direction.',
+  'The baker smiled when the warm cinnamon rolls filled the kitchen with a sweet smell.',
+  'During recess, the children invented a game with chalk lines and careful rules.',
+  'A telescope helps us see distant planets that look like bright dots in the sky.',
+  'The small drone rose gently above the field and took pictures of the corn rows.',
+  'When the power went out, our family used candles and told funny stories together.',
+  'The artist mixed blue and yellow paint until a bright green color appeared.',
+  'A good question can lead to a new experiment, a new friend, or a new idea.',
+  'The train arrived on time, and everyone hurried to find a window seat.',
+  'We practiced tying knots so our camping tent would stay strong in the wind.',
+  'The red bicycle had a bell that rang clearly along the quiet neighborhood street.',
+  'A careful reader notices small clues that help solve a mystery before the last page.',
+  'The gardener saved seeds from the tallest sunflowers for next spring.',
+  'On a cold day, hot soup can make your hands and your heart feel warm.',
+  'The inventor drew three different designs before choosing the simplest one to build.',
+  'Our classroom calendar showed a field trip, a library day, and a music concert.',
+  'The puppy learned to wait patiently before chasing the rolling tennis ball.',
+  'A forest has many layers, from tiny mushrooms near the ground to tall treetops.',
+  'The team listened to every idea and found a solution that no one had imagined alone.',
+  'We watched the shadow of the flagpole grow longer as the afternoon became evening.',
+  'A strong password keeps your favorite game and your private information safer.',
+  'The moonlight made a silver path across the lake while frogs sang nearby.',
+  'Before a big performance, take a slow breath and remember how much you practiced.',
+];
+
+export const LEGACY_TYPING_PASSAGES: TypingPassage[] = LEGACY_PASSAGE_TEXTS.map((text, index) => ({
+  id: `legacy-${String(index + 1).padStart(2, '0')}`,
+  difficulty: 'normal',
+  topic: 'practice archive',
+  text,
+}));
+
+export const TYPING_LIBRARY = [...TYPING_CURRICULUM, ...LEGACY_TYPING_PASSAGES];
+
+export const DIFFICULTY_LABELS: Record<TypingDifficulty, string> = { easy: 'EASY', normal: 'NORMAL', hard: 'HARD' };
+
+export function passagesForDifficulty(difficulty: TypingDifficulty) {
+  return TYPING_LIBRARY.filter(passage => passage.difficulty === difficulty);
+}
+
+export function dailyPassage(dateKey: string) {
+  let hash = 0;
+  for (const character of dateKey) hash = (hash * 31 + character.charCodeAt(0)) >>> 0;
+  return TYPING_CURRICULUM[hash % TYPING_CURRICULUM.length];
+}
