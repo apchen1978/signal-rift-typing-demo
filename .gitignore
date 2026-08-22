@@ -2,3 +2,14 @@ node_modules/
 .npm-cache/
 dist/
 *.tsbuildinfo
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
