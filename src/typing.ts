@@ -1,8 +1,9 @@
-import { DIFFICULTY_LABELS, dailyPassage, passagesForDifficulty, type TypingDifficulty, type TypingPassage } from './typing-content';
+import { DIFFICULTY_LABELS, dailyPassage, passagesForDifficulty, TIMED_TYPING_PASSAGE, type TypingDifficulty, type TypingPassage } from './typing-content';
 import { adaptiveAdvice, addAttempt, emptyReview, loadSoundSetting, loadTypingProgress, recentAverages, saveSoundSetting, saveTypingProgress, topWeakSpots, type MistakeReview, type TypingProgress } from './typing-storage';
 import { analyzeAdaptive } from './typing-adaptive';
 
 export interface TypingScore { wpm: number; accuracy: number; }
+export type TimeLimitSeconds = 15 | 30 | 60;
 
 // ---- 音效引擎（WebAudio，隨打隨響；可被 soundOn 關閉） ----
 let audioCtx: AudioContext | null = null;
@@ -76,6 +77,8 @@ export class TypingChallenge {
   private passage!: TypingPassage;
   private difficulty: TypingDifficulty = 'normal';
   private daily = false;
+  private timeLimitSeconds: TimeLimitSeconds | null = null;
+  private timerId = 0;
   private index = 0;
   private errors = 0;
   private combo = 0;
@@ -88,6 +91,9 @@ export class TypingChallenge {
   private soundOn = true;
   private composing = false;
   private lastTypedKey = '';
+  private charElements: HTMLElement[] = [];
+  private renderedIndex = 0;
+  private cursorFrame = 0;
   private readonly onCompositionStart = () => { this.composing = true; };
   private readonly onCompositionEnd = (event: CompositionEvent) => {
     this.composing = false;
@@ -105,7 +111,7 @@ export class TypingChallenge {
     this.onComplete = onComplete;
     this.progress = loadTypingProgress();
     this.soundOn = loadSoundSetting();
-    this.resizeObserver = new ResizeObserver(() => this.updateCursor());
+    this.resizeObserver = new ResizeObserver(() => this.scheduleCursorUpdate());
     window.addEventListener('pointerdown', warmAudio, { once: true });
     window.addEventListener('keydown', warmAudio, { once: true });
     this.startNewRound();
@@ -113,7 +119,9 @@ export class TypingChallenge {
 
   destroy() {
     this.stopSpeech();
+    this.clearTimer();
     this.resizeObserver.disconnect();
+    if (this.cursorFrame) cancelAnimationFrame(this.cursorFrame);
     if (this.input) {
       this.input.oninput = null; this.input.onkeydown = null; this.input.onpaste = null;
       this.input.removeEventListener('compositionstart', this.onCompositionStart);
@@ -121,11 +129,14 @@ export class TypingChallenge {
     }
   }
 
-  private startNewRound(options: { difficulty?: TypingDifficulty; daily?: boolean; passage?: TypingPassage } = {}) {
+  private startNewRound(options: { difficulty?: TypingDifficulty; daily?: boolean; timeLimitSeconds?: TimeLimitSeconds | null; passage?: TypingPassage } = {}) {
     this.stopSpeech();
+    this.clearTimer();
     this.difficulty = options.difficulty || this.difficulty;
     this.daily = options.daily ?? false;
-    const choices = passagesForDifficulty(this.difficulty);
+    this.timeLimitSeconds = options.timeLimitSeconds === undefined ? this.timeLimitSeconds : options.timeLimitSeconds;
+    if (this.daily) this.timeLimitSeconds = null;
+    const choices = this.timeLimitSeconds ? [TIMED_TYPING_PASSAGE] : passagesForDifficulty(this.difficulty);
     const freshChoices = choices.filter(item => item.id !== this.passage?.id);
     this.passage = options.passage || (this.daily ? dailyPassage(todayKey()) : freshChoices[Math.floor(Math.random() * freshChoices.length)] || choices[0]);
     this.difficulty = this.passage.difficulty;
@@ -139,12 +150,13 @@ export class TypingChallenge {
     const missionCombo = this.missionCombo();
     this.root.innerHTML = `<section class="typing-stage">
       <div class="typing-controls" aria-label="Challenge options">
-        <div class="typing-difficulties" role="group" aria-label="Difficulty level">${(['easy', 'normal', 'hard'] as TypingDifficulty[]).map(level => `<button class="typing-difficulty ${level === this.difficulty && !this.daily ? 'active' : ''}" data-difficulty="${level}" aria-pressed="${level === this.difficulty && !this.daily}">${DIFFICULTY_LABELS[level]}</button>`).join('')}</div>
+        <div class="typing-difficulties" role="group" aria-label="Difficulty level">${(['easy', 'normal', 'hard'] as TypingDifficulty[]).map(level => `<button class="typing-difficulty ${level === this.difficulty && !this.daily && !this.timeLimitSeconds ? 'active' : ''}" data-difficulty="${level}" aria-pressed="${level === this.difficulty && !this.daily && !this.timeLimitSeconds}">${DIFFICULTY_LABELS[level]}</button>`).join('')}</div>
+        <div class="typing-timed" role="group" aria-label="Time trial duration">${([15, 30, 60] as TimeLimitSeconds[]).map(seconds => `<button class="typing-time-limit ${seconds === this.timeLimitSeconds ? 'active' : ''}" data-time-limit="${seconds}" aria-pressed="${seconds === this.timeLimitSeconds}">${seconds} SEC</button>`).join('')}</div>
         <button class="typing-daily ${this.daily ? 'active' : ''}" data-action="daily" aria-pressed="${this.daily}">DAILY · ${this.progress.daily.streak} DAY STREAK</button>
         <button class="typing-sound" data-action="sound" aria-pressed="${this.soundOn}">SOUND ${this.soundOn ? 'ON' : 'OFF'}</button>
       </div>
-      <div class="typing-metrics"><span>LEVEL <b>${DIFFICULTY_LABELS[this.difficulty]}</b></span><span>COMBO <b id="typing-combo">0</b></span><span>WPM <b id="typing-live-wpm">0</b></span><span>ACC <b id="typing-live-acc">100%</b></span><span>ERRORS <b id="typing-errors">0</b></span><span>BEST <b id="typing-best">${this.progress.bestWpm} WPM</b></span></div>
-      <div class="typing-mission"><span id="typing-status">READY · ${this.passage.topic.toUpperCase()}</span><span>${this.daily ? 'DAILY MISSION' : 'MISSION'} · <b>${this.daily ? `95% ACCURACY + ${missionCombo} COMBO` : `REACH ${missionCombo} COMBO`}</b></span></div>
+      <div class="typing-metrics"><span>LEVEL <b>${this.timeLimitSeconds ? 'TIME TRIAL' : DIFFICULTY_LABELS[this.difficulty]}</b></span><span>COMBO <b id="typing-combo">0</b></span><span>WPM <b id="typing-live-wpm">0</b></span><span>ACC <b id="typing-live-acc">100%</b></span><span>ERRORS <b id="typing-errors">0</b></span><span>${this.timeLimitSeconds ? 'TIME' : 'BEST'} <b id="typing-time">${this.timeLimitSeconds ? `${this.timeLimitSeconds}.0S` : `${this.progress.bestWpm} WPM`}</b></span></div>
+      <div class="typing-mission"><span id="typing-status">READY · ${this.timeLimitSeconds ? 'TIME TRIAL' : this.passage.topic.toUpperCase()}</span><span>${this.timeLimitSeconds ? 'TIME TRIAL' : this.daily ? 'DAILY MISSION' : 'MISSION'} · <b>${this.timeLimitSeconds ? `${this.timeLimitSeconds} SECONDS · TYPE AS MUCH AS YOU CAN` : this.daily ? `95% ACCURACY + ${missionCombo} COMBO` : `REACH ${missionCombo} COMBO`}</b></span></div>
       <div class="typing-energy" role="progressbar" aria-label="Sentence progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="typing-energy-fill"></i></div>
       <div class="typing-passage-wrap"><i id="typing-cursor" class="typing-cursor" aria-hidden="true"></i><p id="typing-passage" class="typing-passage" aria-label="Type this sentence"></p></div>
       <label class="typing-input-label" for="typing-input">Start typing here</label><input id="typing-input" class="typing-input" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="typing-passage">
@@ -154,7 +166,14 @@ export class TypingChallenge {
       <div class="typing-footer"><span>LAST ${averages.count || 0} · ${averages.wpm} WPM / ${averages.accuracy}% ACCURACY</span><button class="primary typing-restart" data-action="typing-restart">NEXT CHALLENGE</button></div>
     </section>`;
     const passage = this.root.querySelector<HTMLElement>('#typing-passage')!;
-    for (const [position, character] of [...this.passage.text].entries()) { const span = document.createElement('span'); span.className = `typing-char${position === 0 ? ' current' : ''}`; span.textContent = character === ' ' ? '\u00a0' : character; passage.append(span); }
+    let position = 0;
+    for (const token of this.passage.text.match(/\S+|\s+/g) || []) {
+      const word = /\S/.test(token) ? document.createElement('span') : passage;
+      if (word !== passage) { word.className = 'typing-word'; passage.append(word); }
+      for (const character of token) { const span = document.createElement('span'); span.className = `typing-char${position === 0 ? ' current' : ''}`; span.textContent = /\s/.test(character) ? '\u00a0' : character; word.append(span); position += 1; }
+    }
+    this.charElements = [...passage.querySelectorAll<HTMLElement>('.typing-char')];
+    this.renderedIndex = 0;
     this.input = this.root.querySelector<HTMLInputElement>('#typing-input')!;
     this.input.onpaste = event => event.preventDefault();
     this.input.addEventListener('compositionstart', this.onCompositionStart);
@@ -173,15 +192,16 @@ export class TypingChallenge {
       this.handleInput();
     };
     this.root.querySelector<HTMLElement>('[data-action="typing-restart"]')!.onclick = () => this.startNewRound({ difficulty: this.difficulty });
-    this.root.querySelector<HTMLElement>('[data-action="daily"]')!.onclick = () => this.startNewRound({ daily: !this.daily, difficulty: this.daily ? this.difficulty : 'normal' });
+    this.root.querySelector<HTMLElement>('[data-action="daily"]')!.onclick = () => this.startNewRound({ daily: !this.daily, difficulty: this.daily ? this.difficulty : 'normal', timeLimitSeconds: null });
     this.root.querySelector<HTMLElement>('[data-action="sound"]')!.onclick = () => {
       this.soundOn = !this.soundOn; saveSoundSetting(this.soundOn);
       const button = this.root.querySelector<HTMLElement>('[data-action="sound"]');
       if (button) { button.textContent = `SOUND ${this.soundOn ? 'ON' : 'OFF'}`; button.setAttribute('aria-pressed', String(this.soundOn)); }
       if (this.soundOn) keySound(true);
     };
-    this.root.querySelectorAll<HTMLElement>('[data-difficulty]').forEach(button => button.onclick = () => this.startNewRound({ difficulty: button.dataset.difficulty as TypingDifficulty }));
-    this.resizeObserver.observe(this.root.querySelector('.typing-passage-wrap')!); this.input.focus(); requestAnimationFrame(() => this.updateCursor());
+    this.root.querySelectorAll<HTMLElement>('[data-difficulty]').forEach(button => button.onclick = () => this.startNewRound({ difficulty: button.dataset.difficulty as TypingDifficulty, timeLimitSeconds: null }));
+    this.root.querySelectorAll<HTMLElement>('[data-time-limit]').forEach(button => button.onclick = () => this.startNewRound({ timeLimitSeconds: Number(button.dataset.timeLimit) as TimeLimitSeconds, passage: TIMED_TYPING_PASSAGE }));
+    this.resizeObserver.observe(this.root.querySelector('.typing-passage-wrap')!); this.input.focus(); this.scheduleCursorUpdate();
   }
 
   private handleKeyDown(event: KeyboardEvent) {
@@ -216,7 +236,7 @@ export class TypingChallenge {
 
   private handleCharacter(character: string) {
     if (this.finished) return;
-    if (!this.startedAt) this.startedAt = performance.now();
+    if (!this.startedAt) { this.startedAt = performance.now(); this.startTimer(); }
     if (this.index >= this.passage.text.length) return;
     const ok = matchesTypingCharacter(this.passage.text[this.index], character, this.index);
     if (ok) { this.combo += 1; this.maxCombo = Math.max(this.maxCombo, this.combo); }
@@ -231,17 +251,29 @@ export class TypingChallenge {
   }
 
   private updateView() {
-    const justCompleted = this.index >= this.passage.text.length && !this.finished;
+    const timeExpired = this.timeLimitSeconds !== null && this.startedAt > 0 && performance.now() - this.startedAt >= this.timeLimitSeconds * 1000;
+    const justCompleted = (this.index >= this.passage.text.length || timeExpired) && !this.finished;
     if (justCompleted) this.finished = true;
-    this.root.querySelectorAll<HTMLElement>('.typing-char').forEach((item, position) => { item.className = 'typing-char'; if (position < this.index) item.classList.add(this.mistakes.has(position) ? 'incorrect' : 'correct'); if (position === this.index && !this.finished) item.classList.add('current'); });
-    this.updateCursor(); this.root.querySelector('#typing-errors')!.textContent = String(this.errors); this.root.querySelector('#typing-combo')!.textContent = String(this.combo); this.root.querySelector('#typing-status')!.textContent = this.finished ? 'COMPLETE' : this.startedAt ? `RUNNING · ${this.passage.topic.toUpperCase()}` : `READY · ${this.passage.topic.toUpperCase()}`;
+    if (justCompleted) this.clearTimer();
+    for (const position of new Set([this.renderedIndex - 1, this.renderedIndex, this.index - 1, this.index])) this.renderCharacter(position);
+    this.renderedIndex = this.index;
+    this.scheduleCursorUpdate(); this.root.querySelector('#typing-errors')!.textContent = String(this.errors); this.root.querySelector('#typing-combo')!.textContent = String(this.combo); this.root.querySelector('#typing-status')!.textContent = this.finished ? 'COMPLETE' : this.startedAt ? `RUNNING · ${this.timeLimitSeconds ? 'TIME TRIAL' : this.passage.topic.toUpperCase()}` : `READY · ${this.timeLimitSeconds ? 'TIME TRIAL' : this.passage.topic.toUpperCase()}`;
     const percent = Math.round((this.index / Math.max(this.passage.text.length, 1)) * 100); const energy = this.root.querySelector<HTMLElement>('#typing-energy-fill'); const track = this.root.querySelector<HTMLElement>('.typing-energy'); if (energy) energy.style.transform = `scaleX(${percent / 100})`; if (track) track.setAttribute('aria-valuenow', String(percent));
     const elapsedMs = this.startedAt ? performance.now() - this.startedAt : 0;
     const liveWpm = this.startedAt && elapsedMs > 0 ? Math.round((this.index / 5) / Math.max(elapsedMs / 60000, 1 / 60000)) : 0;
     const liveAcc = this.index === 0 ? 100 : Math.max(0, Math.round(((this.index - this.errors) / this.index) * 100));
     const liveWpmEl = this.root.querySelector<HTMLElement>('#typing-live-wpm'); if (liveWpmEl) liveWpmEl.textContent = String(liveWpm);
     const liveAccEl = this.root.querySelector<HTMLElement>('#typing-live-acc'); if (liveAccEl) liveAccEl.textContent = `${liveAcc}%`;
+    this.updateTimerView();
     if (justCompleted) this.showResult();
+  }
+
+  private renderCharacter(position: number) {
+    const item = this.charElements[position];
+    if (!item) return;
+    item.className = 'typing-char';
+    if (position < this.index) item.classList.add(this.mistakes.has(position) ? 'incorrect' : 'correct');
+    if (position === this.index && !this.finished) item.classList.add('current');
   }
 
   private recordMistake(position: number) {
@@ -255,9 +287,37 @@ export class TypingChallenge {
   private missionCombo() { return Math.min(16, Math.max(6, Math.round(this.passage.text.length / 8))); }
 
   private updateCursor() {
-    const cursor = this.root.querySelector<HTMLElement>('#typing-cursor'); const wrap = this.root.querySelector<HTMLElement>('.typing-passage-wrap'); const active = this.root.querySelector<HTMLElement>('.typing-char.current');
+    const cursor = this.root.querySelector<HTMLElement>('#typing-cursor'); const wrap = this.root.querySelector<HTMLElement>('.typing-passage-wrap'); const active = this.charElements[this.index];
     if (!cursor || !wrap) return; if (!active) { cursor.classList.add('finished'); return; }
     const wrapRect = wrap.getBoundingClientRect(); const activeRect = active.getBoundingClientRect(); cursor.classList.remove('finished'); cursor.style.width = `${activeRect.width}px`; cursor.style.height = `${activeRect.height}px`; cursor.style.transform = `translate3d(${activeRect.left - wrapRect.left}px,${activeRect.top - wrapRect.top}px,0)`;
+  }
+
+  private scheduleCursorUpdate() {
+    if (this.cursorFrame) return;
+    this.cursorFrame = requestAnimationFrame(() => { this.cursorFrame = 0; this.updateCursor(); });
+  }
+
+  private startTimer() {
+    if (this.timeLimitSeconds === null || this.timerId) return;
+    this.timerId = window.setInterval(() => {
+      this.updateTimerView();
+      if (this.startedAt && performance.now() - this.startedAt >= this.timeLimitSeconds! * 1000) {
+        this.clearTimer();
+        this.updateView();
+      }
+    }, 100);
+  }
+
+  private clearTimer() {
+    if (this.timerId) window.clearInterval(this.timerId);
+    this.timerId = 0;
+  }
+
+  private updateTimerView() {
+    const timer = this.root.querySelector<HTMLElement>('#typing-time');
+    if (!timer || this.timeLimitSeconds === null) return;
+    const remaining = Math.max(0, this.timeLimitSeconds - (this.startedAt ? (performance.now() - this.startedAt) / 1000 : 0));
+    timer.textContent = `${remaining.toFixed(1)}S`;
   }
 
   // ---- 發音（Web Speech API；完成後朗讀全文，單字可點擊） ----
@@ -275,7 +335,7 @@ export class TypingChallenge {
   private stopSpeech() { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); }
 
   private showResult() {
-    const durationMs = performance.now() - this.startedAt; const score = calculateTypingScore(this.passage.text.length, this.errors, durationMs); const stars = calculateStarRating(score.accuracy); const missionComplete = this.daily ? score.accuracy >= 95 && this.maxCombo >= this.missionCombo() : this.maxCombo >= this.missionCombo();
+    const durationMs = this.timeLimitSeconds ? Math.min(performance.now() - this.startedAt, this.timeLimitSeconds * 1000) : performance.now() - this.startedAt; const scoredCharacters = this.timeLimitSeconds ? this.index : this.passage.text.length; const score = calculateTypingScore(scoredCharacters, this.errors, durationMs); const stars = calculateStarRating(score.accuracy); const missionComplete = this.timeLimitSeconds ? this.index > 0 : this.daily ? score.accuracy >= 95 && this.maxCombo >= this.missionCombo() : this.maxCombo >= this.missionCombo();
     const attempt = { date: todayKey(), passageId: this.passage.id, difficulty: this.difficulty, wpm: score.wpm, accuracy: score.accuracy, maxCombo: this.maxCombo, durationMs: Math.round(durationMs), mistakes: this.mistakeReview, daily: this.daily };
     const wasBest = score.wpm > this.progress.bestWpm; this.progress = addAttempt(this.progress, attempt); saveTypingProgress(this.progress);
     const weak = topWeakSpots(this.progress.attempts); const advice = adaptiveAdvice(this.progress.attempts, this.difficulty); const result = this.root.querySelector<HTMLElement>('#typing-result')!;
@@ -283,7 +343,8 @@ export class TypingChallenge {
     summary.className = 'typing-result-summary'; headline.textContent = `${score.wpm} WPM`; rank.className = 'typing-rank'; rank.setAttribute('aria-label', `${stars} out of 3 signal stars`);
     for (let position = 1; position <= 3; position += 1) { const mark = document.createElement('i'); mark.className = `typing-rank-mark${position <= stars ? ' active' : ''}`; mark.setAttribute('aria-hidden', 'true'); rank.append(mark); }
     stats.className = 'typing-result-stats'; stats.append(this.createResultStat(`${score.accuracy}%`, 'ACCURACY'), this.createResultStat(String(this.maxCombo), 'MAX COMBO'), this.createResultStat(`${Math.max(1, Math.round(durationMs / 1000))}S`, 'TIME'), this.createResultStat(`${this.progress.bestWpm} WPM`, wasBest ? 'NEW BEST' : 'PERSONAL BEST'));
-    mission.className = `typing-mission-result ${missionComplete ? 'complete' : ''}`; mission.textContent = missionComplete ? 'MISSION COMPLETE · CLEAN CONTROL' : this.daily ? 'DAILY MISSION RETRY · ACCURACY COMES FIRST' : `MISSION RETRY · REACH ${this.missionCombo()} COMBO`;
+    if (this.timeLimitSeconds) { const characters = this.createResultStat(String(this.index), 'CHARACTERS'); stats.insertBefore(characters, stats.firstChild); }
+    mission.className = `typing-mission-result ${missionComplete ? 'complete' : ''}`; mission.textContent = this.timeLimitSeconds ? `TIME TRIAL COMPLETE · ${this.index} CHARACTERS` : missionComplete ? 'MISSION COMPLETE · CLEAN CONTROL' : this.daily ? 'DAILY MISSION RETRY · ACCURACY COMES FIRST' : `MISSION RETRY · REACH ${this.missionCombo()} COMBO`;
     shortcut.className = 'typing-shortcut-hint'; shortcut.textContent = 'SPACE / ENTER → NEXT'; summary.append(headline, rank, shortcut); result.replaceChildren(summary, stats, mission, this.makeLearningPanel(), this.makeReviewPanel(weak, advice), this.makeAdaptivePanel()); result.hidden = false; this.root.querySelector('.typing-stage')?.classList.add('round-complete'); this.root.querySelector('#typing-best')!.textContent = `${this.progress.bestWpm} WPM`;
     const averages = recentAverages(this.progress.attempts);
     const history = this.root.querySelector<HTMLElement>('.typing-footer > span');
