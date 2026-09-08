@@ -96,3 +96,21 @@
 .typing-passage{word-break:normal;overflow-wrap:normal}.typing-word{white-space:nowrap}
 .typing-timed{display:flex;gap:6px;flex-wrap:wrap}.typing-time-limit{min-height:34px;padding:8px 10px;border:1px solid #365052;color:var(--muted);font:10px monospace;letter-spacing:.08em;transition:color .16s ease,border-color .16s ease,background .16s ease}.typing-time-limit:hover{border-color:var(--cyan);color:#eef4ed}.typing-time-limit.active{border-color:var(--green);background:rgba(184,255,61,.1);color:var(--green)}
 @media(max-width:850px){.typing-timed{width:100%}.typing-time-limit{flex:1;text-align:center}.typing-word{white-space:nowrap}}
+
+/* Jumpverse level-clear overlay — game page only, shared stylesheet untouched */
+.game-page .clear-overlay{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(4,7,11,.72);backdrop-filter:blur(3px);animation:clearFade .22s ease}
+.game-page .clear-card{max-width:430px;width:100%;padding:30px 28px 26px;background:linear-gradient(180deg,#0e1820,#0a1117);border:1px solid #2c4148;border-radius:14px;text-align:center;box-shadow:0 24px 70px -20px rgba(0,0,0,.75)}
+.game-page .clear-kicker{font:700 10px monospace;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin:0 0 10px}
+.game-page .clear-title{font:600 clamp(26px,6vw,34px)/1.05 monospace;letter-spacing:-.02em;margin:0 0 6px;color:#eef4ed}
+.game-page .clear-title em{font-style:normal;color:var(--green)}
+.game-page .clear-name{margin:2px 0 0;font:14px/1.4 var(--sans, system-ui);color:#b9c6c2}
+.game-page .clear-stats{display:flex;justify-content:center;gap:22px;margin:18px 0 4px;color:var(--muted);font:10px monospace;letter-spacing:.1em;text-transform:uppercase}
+.game-page .clear-stats b{display:block;margin-top:4px;color:var(--green);font:700 15px monospace;letter-spacing:0}
+.game-page .clear-progress{margin:12px 0 0;height:4px;background:#1b2a30;border-radius:99px;overflow:hidden}
+.game-page .clear-progress i{display:block;height:100%;width:100%;background:var(--green);box-shadow:0 0 12px rgba(184,255,61,.5);animation:clearFill .5s ease}
+.game-page .clear-actions{display:flex;gap:10px;justify-content:center;margin-top:22px;flex-wrap:wrap}
+.game-page .clear-hint{margin:16px 0 0;color:var(--muted);font:10px monospace;letter-spacing:.08em}
+@keyframes clearFade{from{opacity:0}to{opacity:1}}
+@keyframes clearFill{from{width:0}}
+.game-page .clear-title{animation:clearPop .35s cubic-bezier(.2,.9,.3,1.4)}
+@keyframes clearPop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
