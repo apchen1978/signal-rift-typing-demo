@@ -1,10 +1,16 @@
 import type { LevelData, LevelObject, ObjectType } from './types';
 
-const names = ['Vector Wake','Chromatic Fault','Gravitas Circuit','Orbital Fracture','White Noise Run','Aeroform','Pendulum Logic','Null Horizon','Twin Signal','Razor Protocol','Terminal Overdrive'];
-const diffs = ['Demon / Entry','Demon / Sharp','Demon / Gravitas','Demon / Flight','Demon / Wave','Demon / Precision','Demon / Technical','Demon / Insane','Demon / Dual','Demon / Extreme','Extreme Demon / Apex'];
-const palette = ['#b8ff3d','#ffbd4a','#4de3ff','#ff6b9d','#a986ff','#5dffb2'];
+// Jumpverse original level set. Every name, difficulty word and palette color
+// below is original to this project (no Geometry Dash official level names or
+// the Demon difficulty ladder). World framing: a signal-relay runner hopping
+// across broadcast stations.
+const names = ['First Signal','Static Bloom','Orbit Hop','Lift Runway','Ripple Sector','Hover Field','Arc Swing','Split Core','Noise Canyon','Carrier Ascent','Final Handshake'];
+const diffs = ['Chill','Steady','Bouncy','Brisk','Fast','Frantic','Wild','Intense','Brutal','Furious','Apex'];
+// Original warm/teal palette (not the GD neon set). Hazards stay readable on
+// the dark blue-green scene while the whole game reads as its own look.
+const palette = ['#ffc94d','#ff8a5c','#6ee7d8','#b78bff','#ff6f9c','#8ef07d'];
 let uid = 1;
-export function obj(type: ObjectType, x: number, y: number, extra: Partial<LevelObject> = {}): LevelObject { return { id: `o${uid++}`, type, x, y, rotation: 0, scale: 1, color: '#b8ff3d', designVariant: 0, layer: 1, opacity: 1, properties: {}, ...extra }; }
+export function obj(type: ObjectType, x: number, y: number, extra: Partial<LevelObject> = {}): LevelObject { return { id: `o${uid++}`, type, x, y, rotation: 0, scale: 1, color: '#ffc94d', designVariant: 0, layer: 1, opacity: 1, properties: {}, ...extra }; }
 export function snapObjectToSurface(object: LevelObject, surfaceTop: number, attachTo: 'ground' | 'platform' | 'ceiling' | 'freePlacement' = 'ground') {
   object.properties.attachTo = attachTo;
   if (attachTo === 'freePlacement') return object;
@@ -109,7 +115,7 @@ function addPortalGates(objects: LevelObject[], levelIndex: number) {
   }
 }
 export function makeLevels(): LevelData[] { return names.map((name, i) => { const objects = base(i); const modes: GameDataMode[] = ['cube','cube','ball','ship','wave','ufo','swing','cube','wave','ship','cube']; const mode: GameDataMode = modes[i];
-  for (let x = 900; x < 6000; x += 900) { objects.push(obj('modePortal', x, 300, { properties: { mode }, color: '#4de3ff' })); if (i >= 2) objects.push(obj('gravityPortal', x + 280, 250, { color: '#ff6b9d' })); if (i >= 4) objects.push(obj('speedPortal', x + 460, 280, { properties: { speedTier: i >= 8 ? 'FASTER' : 'FAST' }, color: '#ffbd4a' })); if (i >= 5) objects.push(obj('miniPortal', x + 590, 290, { color: '#a986ff' })); if (i >= 8) objects.push(obj('dualPortal', x + 710, 280, { color: '#5dffb2' })); }
+  for (let x = 900; x < 6000; x += 900) { objects.push(obj('modePortal', x, 300, { properties: { mode }, color: '#6ee7d8' })); if (i >= 2) objects.push(obj('gravityPortal', x + 280, 250, { color: '#ff8a5c' })); if (i >= 4) objects.push(obj('speedPortal', x + 460, 280, { properties: { speedTier: i >= 8 ? 'FASTER' : 'FAST' }, color: '#ffc94d' })); if (i >= 5) objects.push(obj('miniPortal', x + 590, 290, { color: '#b78bff' })); if (i >= 8) objects.push(obj('dualPortal', x + 710, 280, { color: '#8ef07d' })); }
   if (i === 1 || i === 3 || i === 6 || i === 9 || i === 10) for (let x = 1200; x < 6000; x += 700) objects.push(obj('platform', x, 240 - (x % 3) * 35, { width: 120, height: 16, color: palette[(i + 2) % palette.length] }));
   addPortalGates(objects, i);
   addGravityRoutes(objects, i);

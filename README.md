@@ -2,7 +2,7 @@
 
 Lil Matt's Gaming World 旗下兩個獨立遊戲入口：
 
-- **Jumpverse**（`jumpverse.html`）— 平台冒險。**Vector Wake = Level 1**。
+- **Jumpverse**（`jumpverse.html`）— 平台冒險。**First Signal = Level 1**。
 - **WordForge**（`wordforge.html`）— 遊戲化英語學習。**Typing Challenge = 目前第一個模式**。
 
 入口總覽頁：`index.html`（Gaming World hub，兩個 [Play] 入口）。
@@ -45,7 +45,7 @@ Cube、Ship、Ball、UFO、Wave、Swing 已納入同一套 player state machine�
 
 ## 官方關卡
 
-目前有 11 個獨立命名、獨立難度標示的短版 playable prototypes，從 Entry Demon 逐步展示飛行、重力、Wave、Mini、Dual 與混合模式，最後一關是 Extreme Demon / Apex 方向的短版展示。每關的 Best%、完成狀態與模式入口都在 Level Select。
+目前有 11 個獨立命名、獨立難度標示的短版 playable prototypes，從 Chill 逐步展示飛行、重力、Wave、Mini、Dual 與混合模式，最後一關是 Apex 方向的短版展示。每關的 Best%、完成狀態與模式入口都在 Level Select。
 
 ## Editor
 

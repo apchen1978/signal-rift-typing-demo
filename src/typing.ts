@@ -200,7 +200,10 @@ export class TypingChallenge {
       if (this.soundOn) keySound(true);
     };
     this.root.querySelectorAll<HTMLElement>('[data-difficulty]').forEach(button => button.onclick = () => this.startNewRound({ difficulty: button.dataset.difficulty as TypingDifficulty, timeLimitSeconds: null }));
-    this.root.querySelectorAll<HTMLElement>('[data-time-limit]').forEach(button => button.onclick = () => this.startNewRound({ timeLimitSeconds: Number(button.dataset.timeLimit) as TimeLimitSeconds, passage: TIMED_TYPING_PASSAGE }));
+    this.root.querySelectorAll<HTMLElement>('[data-time-limit]').forEach(button => button.onclick = () => {
+      this.startNewRound({ timeLimitSeconds: Number(button.dataset.timeLimit) as TimeLimitSeconds, passage: TIMED_TYPING_PASSAGE });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
     this.resizeObserver.observe(this.root.querySelector('.typing-passage-wrap')!); this.input.focus(); this.scheduleCursorUpdate();
   }
 

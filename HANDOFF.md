@@ -75,4 +75,47 @@ Reproduced in headless Chrome + CDP (trusted keyboard events): plain Latin input
 
 - Keep conventional commit style: `feat:`, `fix:`, `docs:`, `content:` (lowercase)
 - `.gitignore` already covers `node_modules/`, `dist/`, `*.tsbuildinfo`
-- Current branch: `codex/typing-game-hardening`
+
+## FINISH & SHIP — Lil Matt's Gaming World (2026-08-22)
+
+### Final product hierarchy
+
+```
+Lil Matt's Gaming World
+├── 🎮 Jumpverse
+│   └── Platform Adventure
+│       └── Vector Wake = Level 1
+└── ⚒️ WordForge
+    └── Gamified English Learning
+        └── Typing Challenge = current first mode
+```
+
+### Playtest evidence (qualitative, one player only)
+
+REAL PLAYER FEEDBACK:
+Lil Matt preferred Jumpverse and WordForge as separate experiences.
+
+This is one-player qualitative feedback. It is NOT converted into a numeric KPI,
+market validation, commercial validation, or broad user validation.
+
+### Product split (this branch of work)
+
+- `index.html` → Gaming World hub (two independent [Play] choices)
+- `jumpverse.html` → Jumpverse (user-facing brand `JUMP//VERSE`; Vector Wake = Level 1; no TYPING nav)
+- `wordforge.html` → WordForge (brand `WORD//FORGE`; eyebrow GAMIFIED ENGLISH LEARNING; Typing Challenge = first mode)
+- Vite multi-page build with `base: './'` (GitHub Pages subpath safe)
+- Typing modules (`src/typing*.ts`) reused as-is; no new learning modes built
+- localStorage keys unchanged: `signal-rift-progress-v1` / `signal-rift-custom-levels-v1` (Jumpverse), `signal-rift:typing-*` (WordForge)
+
+### Public deployment
+
+- Repo: `apchen1978/signal-rift-typing-demo` (public deploy artifact; historical name retained — URL preserved)
+- Hub: https://apchen1978.github.io/signal-rift-typing-demo/
+- Jumpverse: .../jumpverse.html
+- WordForge: .../wordforge.html
+
+### Repo identity note
+
+`apchen1978/signal-rift` remains the canonical repo but is an internal/historical
+identity; all user-facing branding is Jumpverse / WordForge. Do not rename the
+repo for branding purposes.

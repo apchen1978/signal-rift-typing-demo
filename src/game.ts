@@ -31,6 +31,9 @@ export class GameEngine {
   private orbTriggered = new Set<string>();
   private orbActive = new Set<string>();
   private teachingSeen = new Set<string>();
+  // Trail ghost history (presentation only) — previous player poses drawn with
+  // fading alpha while airborne / flying, so movement reads as motion.
+  private trail: Array<{ x: number; y: number; angle: number; size: number; mode: GameMode }> = [];
   private readonly levelStartX = 100;
   private readonly renderObjects: LevelObject[];
   private readonly collisionObjects: LevelObject[];
@@ -39,6 +42,7 @@ export class GameEngine {
   private perf = { fps: 0, frameMs: 0, physicsMs: 0, renderMs: 0 };
   private fpsWindowStart = 0;
   private fpsWindowFrames = 0;
+  private elapsed = 0;
   private readonly speedMultipliers: Record<SpeedTier, number> = { SLOW: .75, NORMAL: 1, FAST: 1.35, FASTER: 1.7, MAX: 2 };
   private readonly shipGravity = 1050;
   private readonly shipThrust = 2500;
@@ -115,6 +119,7 @@ export class GameEngine {
     const frameStart = performance.now();
     const dt = Math.min(Math.max((now - this.last) / 1000, 0), 0.033);
     this.last = now;
+    this.elapsed += dt;
     const physicsStart = performance.now();
     this.update(dt);
     const physicsMs = performance.now() - physicsStart;
@@ -213,6 +218,17 @@ export class GameEngine {
     const cameraTarget = Math.max(0, p.x - 180);
     const cameraSmoothing = 1 - Math.exp(-12 * dt);
     this.camera += (cameraTarget - this.camera) * cameraSmoothing;
+
+    // Trail sampling: only record when the pose is changing fast (airborne,
+    // gliding or wave/ball spinning) — a static grounded cube leaves no ghosts.
+    const poseMoving = !p.grounded || p.mode === 'ship' || p.mode === 'wave' || p.mode === 'ball';
+    if (poseMoving) {
+      this.trail.push({ x: p.x, y: p.y, angle: p.angle, size: p.size, mode: p.mode });
+      if (this.trail.length > 8) this.trail.shift();
+    } else {
+      this.trail.length = 0;
+    }
+
     const progress = this.progressPercent();
     this.callbacks.onProgress(progress);
     if (progress >= 100) { this.stop(); this.callbacks.onComplete(); }
@@ -345,24 +361,55 @@ export class GameEngine {
   private drawAtmosphere(w: number, h: number) {
     const c = this.ctx, horizon = this.groundY;
     const sky = c.createLinearGradient(0, 0, 0, h); sky.addColorStop(0, '#0b1621'); sky.addColorStop(.58, '#071019'); sky.addColorStop(1, '#05080e'); c.fillStyle = sky; c.fillRect(0, 0, w, h);
-    const bloom = c.createRadialGradient(w * .74, h * .18, 8, w * .74, h * .18, w * .56); bloom.addColorStop(0, 'rgba(77,227,255,.12)'); bloom.addColorStop(1, 'rgba(77,227,255,0)'); c.fillStyle = bloom; c.fillRect(0, 0, w, h);
+    // BPM pulse (original feel): the horizon bloom breathes at the level's
+    // tempo, turning the music-less background into a rhythm cue. Pure visuals.
+    const bpm = Math.max(60, this.level.bpm || 128);
+    const beat = (this.elapsed * bpm) / 60;
+    const pulse = 1 + 0.10 * Math.sin(beat * Math.PI * 2);
+    const bloom = c.createRadialGradient(w * .74, h * .18, 8, w * .74, h * .18, w * .56 * pulse); bloom.addColorStop(0, 'rgba(255,180,77,.10)'); bloom.addColorStop(1, 'rgba(255,180,77,0)'); c.fillStyle = bloom; c.fillRect(0, 0, w, h);
     c.save(); c.globalAlpha = .34; c.strokeStyle = '#17313a'; c.lineWidth = 1;
     const offset = (this.camera * .18) % 96;
     for (let x = -96 - offset; x < w + 96; x += 96) { c.beginPath(); c.moveTo(w * .5 + (x - w * .5) * .2, 58); c.lineTo(x, horizon); c.stroke(); }
     for (let y = 112; y < horizon; y += 44) { const t = (y - 58) / (horizon - 58); c.beginPath(); c.moveTo(0, 58 + t * t * (horizon - 58)); c.lineTo(w, 58 + t * t * (horizon - 58)); c.stroke(); }
     c.globalAlpha = .8; c.strokeStyle = '#31575a'; c.beginPath(); c.moveTo(0, horizon); c.lineTo(w, horizon); c.stroke(); c.globalAlpha = .7; c.strokeStyle = '#4f8588'; c.beginPath(); c.moveTo(0, this.ceilingY); c.lineTo(w, this.ceilingY); c.stroke(); c.globalAlpha = .22; c.strokeStyle = '#31575a'; c.strokeRect(0, this.ceilingY + 8, w, 14); c.restore();
   }
-  private drawPlayer() {
-    const c = this.ctx, p = this.player, half = p.size / 2;
-    c.save(); c.translate(p.x + half, p.y + half); c.rotate(p.angle); c.fillStyle = '#b8ff3d'; c.strokeStyle = '#efffc4'; c.shadowColor = '#b8ff3d'; c.shadowBlur = 18;
+  private drawPlayerShape(x: number, y: number, angle: number, size: number, mode: GameMode, fill: string, stroke: string, shadow: string, alpha = 1, blur = 18, core = true) {
+    const c = this.ctx, half = size / 2;
+    c.save(); c.translate(x + half, y + half); c.rotate(angle); c.globalAlpha = alpha;
+    c.fillStyle = fill; c.strokeStyle = stroke; c.shadowColor = shadow; c.shadowBlur = blur;
     c.beginPath();
-    if (p.mode === 'ship') { c.moveTo(half, 0); c.lineTo(-half, -half * .68); c.lineTo(-half * .48, 0); c.lineTo(-half, half * .68); }
-    else if (p.mode === 'wave') { c.moveTo(half, 0); c.lineTo(-half, -half); c.lineTo(-half * .34, 0); c.lineTo(-half, half); }
-    else if (p.mode === 'ufo') { c.arc(0, 0, half * .82, Math.PI, 0); c.lineTo(half * .5, half * .58); c.lineTo(-half * .5, half * .58); c.closePath(); }
-    else if (p.mode === 'ball') { c.arc(0, 0, half * .78, 0, Math.PI * 2); }
+    if (mode === 'ship') { c.moveTo(half, 0); c.lineTo(-half, -half * .68); c.lineTo(-half * .48, 0); c.lineTo(-half, half * .68); }
+    else if (mode === 'wave') { c.moveTo(half, 0); c.lineTo(-half, -half); c.lineTo(-half * .34, 0); c.lineTo(-half, half); }
+    else if (mode === 'ufo') { c.arc(0, 0, half * .82, Math.PI, 0); c.lineTo(half * .5, half * .58); c.lineTo(-half * .5, half * .58); c.closePath(); }
+    else if (mode === 'ball') { c.arc(0, 0, half * .78, 0, Math.PI * 2); }
     else { c.moveTo(-half, 0); c.lineTo(0, -half); c.lineTo(half, 0); c.lineTo(0, half); }
     c.closePath(); c.fill(); c.shadowBlur = 0; c.lineWidth = 1.4; c.stroke();
-    c.globalAlpha = .55; c.strokeStyle = '#0a241d'; c.beginPath(); c.moveTo(-half * .42, 0); c.lineTo(half * .42, 0); c.stroke(); c.restore();
+    // Original "signal core" mark — a warm inner core plus a centre dot so the
+    // runner reads as this game's own character, not a plain neon cube.
+    if (core && (mode === 'cube' || mode === 'ball')) {
+      c.globalAlpha = alpha * .95; c.fillStyle = stroke;
+      c.beginPath(); c.arc(0, 0, half * .34, 0, Math.PI * 2); c.fill();
+      c.fillStyle = fill;
+      c.beginPath(); c.arc(0, 0, half * .14, 0, Math.PI * 2); c.fill();
+    } else if (core) {
+      c.globalAlpha = alpha * .7; c.strokeStyle = stroke; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(-half * .3, 0); c.lineTo(half * .3, 0); c.stroke();
+    }
+    c.restore();
+  }
+
+  private drawPlayer() {
+    const c = this.ctx, p = this.player, half = p.size / 2;
+    // Trail ghosts — render a short history of past positions while airborne or
+    // in flight modes, so jumps/glides read as motion. Pure presentation.
+    for (let i = this.trail.length - 1; i >= 0; i--) {
+      const t = this.trail[i];
+      const fade = (i + 1) / this.trail.length;
+      this.drawPlayerShape(t.x, t.y, t.angle, t.size, t.mode, '#ffd166', '#fff3d6', '#ffd166', .10 * fade, 0, false);
+    }
+    this.drawPlayerShape(p.x, p.y, p.angle, p.size, p.mode, '#ffd166', '#fff3d6', '#ffb84d', 1, 18, true);
+    c.save(); c.globalAlpha = .45; c.strokeStyle = '#7a4a12'; c.lineWidth = 1.6;
+    c.beginPath(); c.moveTo(p.x + half - 6, p.y + half); c.lineTo(p.x + half + 6, p.y + half); c.stroke(); c.restore();
   }
   private drawPerformanceHud() { const c = this.ctx; const p = this.player; c.save(); c.fillStyle = 'rgba(5,10,14,.9)'; c.fillRect(16, 16, 310, 236); c.fillStyle = '#b8ff3d'; c.font = '11px monospace'; c.fillText(`FPS: ${this.perf.fps.toFixed(0)}`, 28, 36); c.fillText(`Frame: ${this.perf.frameMs.toFixed(2)}ms`, 28, 54); c.fillText(`Physics: ${this.perf.physicsMs.toFixed(2)}ms`, 28, 72); c.fillText(`Render: ${this.perf.renderMs.toFixed(2)}ms`, 28, 90); c.fillText(`Objects: ${this.visibleObjectCount} / ${this.renderObjects.length}`, 28, 108); c.fillText(`Collision: ${this.collisionCheckCount}`, 28, 126); c.fillText(`MODE: ${p.mode.toUpperCase()}`, 28, 152); c.fillText(`WORLD SPEED: ${this.worldSpeed.toFixed(0)}`, 28, 170); c.fillText(`BASE SPEED: ${this.baseWorldSpeed.toFixed(0)}`, 28, 188); c.fillText(`MULTIPLIER: ${this.speedMultiplier.toFixed(2)}  TIER: ${p.speedTier}`, 28, 206); c.fillText(`vy: ${p.vy.toFixed(1)}  gravitySign: ${p.gravity}`, 28, 224); c.fillText(`input: ${this.input ? 'HELD' : 'RELEASED'}`, 28, 242); c.restore(); }
   private drawDebug(h: number) { const c = this.ctx, p = this.player; c.save(); c.translate(-this.camera, 0); c.strokeStyle = '#4de3ff'; c.lineWidth = 2; c.strokeRect(p.x, p.y, p.size, p.size); c.strokeStyle = '#b8ff3d'; c.beginPath(); c.moveTo(this.camera - 20, this.groundY); c.lineTo(this.camera + innerWidth + 20, this.groundY); c.moveTo(this.camera - 20, this.ceilingY); c.lineTo(this.camera + innerWidth + 20, this.ceilingY); c.stroke(); c.strokeStyle = '#ffbd4a'; for (const o of this.level.objects) { if (o.type === 'platform') c.strokeRect(o.x, o.y, o.width || 120, o.height || 16); if (o.type === 'jumpOrb') { const radius = Number(o.properties.activationRadius) || 16; c.beginPath(); c.arc(o.x + 16, o.y + 16, radius + p.size / 2, 0, Math.PI * 2); c.stroke(); } } c.fillStyle = '#eef4ed'; c.font = '11px monospace'; c.fillText(`DEBUG F3  grounded=${p.grounded} gravitySign=${p.gravity} y=${p.y.toFixed(1)}`, this.camera + 18, Math.max(18, h - 18)); c.restore(); }
