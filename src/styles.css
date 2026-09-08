@@ -99,6 +99,7 @@
 
 /* Jumpverse level-clear overlay — game page only, shared stylesheet untouched */
 .game-page .clear-overlay{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(4,7,11,.72);backdrop-filter:blur(3px);animation:clearFade .22s ease}
+.game-page .clear-overlay[hidden]{display:none}
 .game-page .clear-card{max-width:430px;width:100%;padding:30px 28px 26px;background:linear-gradient(180deg,#0e1820,#0a1117);border:1px solid #2c4148;border-radius:14px;text-align:center;box-shadow:0 24px 70px -20px rgba(0,0,0,.75)}
 .game-page .clear-kicker{font:700 10px monospace;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin:0 0 10px}
 .game-page .clear-title{font:600 clamp(26px,6vw,34px)/1.05 monospace;letter-spacing:-.02em;margin:0 0 6px;color:#eef4ed}
