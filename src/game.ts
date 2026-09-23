@@ -165,8 +165,10 @@ export class GameEngine {
       const targetAngle = Math.max(-0.42, Math.min(0.42, p.vy * 0.00055));
       p.angle += (targetAngle - p.angle) * (1 - Math.exp(-14 * dt));
     } else if (p.mode === 'cube' || p.mode === 'ball' || p.mode === 'ufo' || p.mode === 'swing') {
-      if (press && p.grounded) { p.vy = -600 * p.gravity; p.grounded = false; }
-      if (p.mode === 'ufo' && press) p.vy = -420 * p.gravity;
+      // A short mobile tap can begin and end between animation frames. Keep the
+      // edge-triggered input so tap modes still act once after pointerup.
+      if ((press || justPressed) && p.grounded) { p.vy = -600 * p.gravity; p.grounded = false; }
+      if (p.mode === 'ufo' && (press || justPressed)) p.vy = -420 * p.gravity;
       p.vy += 2088 * p.gravity * dt;
       p.y += p.vy * dt;
     } else {

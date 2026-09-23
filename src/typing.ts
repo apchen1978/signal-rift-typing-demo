@@ -99,7 +99,7 @@ export class TypingChallenge {
     this.composing = false;
     const committed = event.data || '';
     if (committed) {
-      if (/[\u3400-\u9fff]/.test(committed)) this.showImeHint();
+      if (/[\u3400-\u9fff]/.test(committed)) { this.showImeHint(); return; }
       this.handleCharacters(committed);
     }
   };
@@ -148,7 +148,7 @@ export class TypingChallenge {
     this.resizeObserver.disconnect();
     const averages = recentAverages(this.progress.attempts);
     const missionCombo = this.missionCombo();
-    this.root.innerHTML = `<section class="typing-stage">
+    this.root.innerHTML = `<section class="typing-stage notranslate" lang="en" translate="no">
       <div class="typing-controls" aria-label="Challenge options">
         <div class="typing-difficulties" role="group" aria-label="Difficulty level">${(['easy', 'normal', 'hard'] as TypingDifficulty[]).map(level => `<button class="typing-difficulty ${level === this.difficulty && !this.daily && !this.timeLimitSeconds ? 'active' : ''}" data-difficulty="${level}" aria-pressed="${level === this.difficulty && !this.daily && !this.timeLimitSeconds}">${DIFFICULTY_LABELS[level]}</button>`).join('')}</div>
         <div class="typing-timed" role="group" aria-label="Time trial duration">${([15, 30, 60] as TimeLimitSeconds[]).map(seconds => `<button class="typing-time-limit ${seconds === this.timeLimitSeconds ? 'active' : ''}" data-time-limit="${seconds}" aria-pressed="${seconds === this.timeLimitSeconds}">${seconds} SEC</button>`).join('')}</div>
@@ -159,7 +159,7 @@ export class TypingChallenge {
       <div class="typing-mission"><span id="typing-status">READY · ${this.timeLimitSeconds ? 'TIME TRIAL' : this.passage.topic.toUpperCase()}</span><span>${this.timeLimitSeconds ? 'TIME TRIAL' : this.daily ? 'DAILY MISSION' : 'MISSION'} · <b>${this.timeLimitSeconds ? `${this.timeLimitSeconds} SECONDS · TYPE AS MUCH AS YOU CAN` : this.daily ? `95% ACCURACY + ${missionCombo} COMBO` : `REACH ${missionCombo} COMBO`}</b></span></div>
       <div class="typing-energy" role="progressbar" aria-label="Sentence progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="typing-energy-fill"></i></div>
       <div class="typing-passage-wrap"><i id="typing-cursor" class="typing-cursor" aria-hidden="true"></i><p id="typing-passage" class="typing-passage" aria-label="Type this sentence"></p></div>
-      <label class="typing-input-label" for="typing-input">Start typing here</label><input id="typing-input" class="typing-input" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="typing-passage">
+      <label class="typing-input-label" for="typing-input">Start typing here</label><input id="typing-input" class="typing-input notranslate" type="text" inputmode="text" lang="en" translate="no" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-describedby="typing-passage">
       <p class="typing-tip">Use Backspace to delete and type a character again. Learning notes appear after you finish.</p>
       <p id="typing-ime-hint" class="typing-ime-hint" hidden></p>
       <div id="typing-result" class="typing-result" aria-live="polite" hidden></div>
@@ -223,7 +223,7 @@ export class TypingChallenge {
     if (!value) return;
     if (this.lastTypedKey && value === this.lastTypedKey) { this.lastTypedKey = ''; return; }
     this.lastTypedKey = '';
-    if (/[\u3400-\u9fff]/.test(value)) this.showImeHint();
+    if (/[\u3400-\u9fff]/.test(value)) { this.showImeHint(); return; }
     this.handleCharacters(value);
   }
 
