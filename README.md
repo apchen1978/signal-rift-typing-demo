@@ -1,15 +1,16 @@
 # Jumpverse · Lil Matt's Gaming World
 
-Lil Matt's Gaming World 旗下兩個獨立遊戲入口：
+Lil Matt's Gaming World 旗下三個獨立遊戲入口：
 
 - **Jumpverse**（`jumpverse.html`）— 平台冒險。**First Signal = Level 1**。
 - **WordForge**（`wordforge.html`）— 遊戲化英語學習。**Typing Challenge = 目前第一個模式**。
+- **Waste Time**（[獨立遊戲站](https://apchen1978.github.io/wastetime/)）— 點擊／放置小遊戲；從 Gaming World hub 前往，原站與遊戲進度維持獨立。
 
-入口總覽頁：`index.html`（Gaming World hub，兩個 [Play] 入口）。
+入口總覽頁：`index.html`（Gaming World hub，三個 [Play] 入口）。
 
 Jumpverse 是原創的高難度節奏平台遊戲 MVP：角色自動向右前進，玩家以精準輸入穿越幾何危險、模式傳送門與重力變化。所有關卡名稱、介面、幾何圖形、音效回饋與程式碼均為本專案原創，未使用 Geometry Dash 的素材或關卡。
 
-> 註：`signal-rift` 為內部／歷史 repo 身份；使用者面向品牌為 **Jumpverse** 與 **WordForge**。
+> 註：`signal-rift` 為內部／歷史 repo 身份；使用者面向品牌為 **Lil Matt's Gaming World**，集合 Jumpverse、WordForge 與 Waste Time 三款獨立遊戲。
 
 ## 技術與安裝
 
