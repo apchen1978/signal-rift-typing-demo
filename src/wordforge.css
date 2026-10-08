@@ -1,0 +1,199 @@
+/* WordForge only. The shared gaming-world stylesheet also serves Jumpverse. */
+body.wordforge-app {
+  --green: #d9b978;
+  --cyan: #a9bfc3;
+  --muted: #aebdb8;
+  --line: #3c554d;
+  color: #f5f1e8;
+  background: #10251f;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.wordforge-app .app-shell { padding: 0 clamp(18px, 4vw, 64px) 72px; }
+.wordforge-app .topbar {
+  max-width: 1120px; margin: 0 auto; height: 70px;
+  border-color: #42594f; font-family: inherit;
+}
+.wordforge-app .brand { color: #f5f1e8; text-decoration: none; }
+.wordforge-app .brand span { color: #d9b978; }
+.wordforge-app .wordforge-back {
+  color: #d5e0da; text-decoration: none; font-size: 12px;
+  font-weight: 650; letter-spacing: .08em;
+}
+.wordforge-app .wordforge-back:hover { color: #fff; }
+.wordforge-app .typing-page { max-width: 1120px; padding: clamp(26px, 5vw, 56px) 0 0; }
+.wordforge-app .typing-head { margin-bottom: 26px; align-items: center; }
+.wordforge-app .typing-head h1 {
+  margin: 8px 0 16px; font-size: clamp(2.5rem, 6vw, 5.5rem);
+  line-height: 1; letter-spacing: -.065em;
+}
+.wordforge-app .typing-head .eyebrow { color: #d9b978; letter-spacing: .13em; }
+.wordforge-app .typing-head > div > p:last-child {
+  max-width: 54ch; color: #d4e0d9; font-size: clamp(14px, 1.6vw, 17px);
+}
+.wordforge-headmark {
+  display: grid; place-items: center; flex: 0 0 auto;
+  width: 76px; height: 76px; border: 1px solid #6b806f;
+  border-radius: 50%; color: #f5f1e8; font-weight: 750;
+  font-size: 27px; letter-spacing: -.12em; transform: rotate(-8deg);
+}
+.wordforge-headmark span { color: #d9b978; }
+.wordforge-app .typing-stage {
+  border: 1px solid #61796b; border-radius: 16px;
+  background: #f5f1e8; color: #19352c;
+  box-shadow: 0 26px 70px rgba(0, 0, 0, .2);
+}
+.wordforge-app .typing-stage::after { display: none; }
+.wordforge-app .typing-controls { border-color: #d9ded4; gap: 10px; flex-wrap: wrap; }
+.wordforge-app .typing-difficulties,
+.wordforge-app .typing-timed { gap: 5px; }
+.wordforge-app .typing-difficulty,
+.wordforge-app .typing-time-limit,
+.wordforge-app .typing-daily,
+.wordforge-app .typing-sound {
+  min-height: 42px; padding: 9px 13px; border: 1px solid #a8b5aa;
+  border-radius: 8px; color: #345449; background: #fffdf7;
+  font: 650 11px system-ui, sans-serif; letter-spacing: .02em;
+}
+.wordforge-app .typing-sound { margin-left: 0; }
+.wordforge-app .typing-daily { margin-left: auto; }
+.wordforge-app .typing-difficulty:hover,
+.wordforge-app .typing-time-limit:hover,
+.wordforge-app .typing-daily:hover,
+.wordforge-app .typing-sound:hover { border-color: #315848; color: #173e31; }
+.wordforge-app .typing-difficulty.active,
+.wordforge-app .typing-time-limit.active,
+.wordforge-app .typing-daily.active,
+.wordforge-app .typing-sound[aria-pressed="true"] {
+  border-color: #1e5140; color: #f8f4e9; background: #1e5140;
+}
+.wordforge-app .typing-metrics {
+  display: grid; grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px; margin: 0 0 24px; color: #527063;
+  font: 650 11px system-ui, sans-serif; letter-spacing: .03em;
+}
+.wordforge-app .typing-metrics span {
+  min-width: 0; padding: 12px; border: 1px solid #d7ddd3;
+  border-radius: 9px; background: #fffdf8;
+}
+.wordforge-app .typing-metrics b { display: block; margin: 7px 0 0; color: #173d31; font-size: 16px; letter-spacing: -.02em; }
+.wordforge-app .typing-metrics #typing-live-wpm,
+.wordforge-app .typing-metrics #typing-live-acc { display: block; }
+.wordforge-app .typing-mission {
+  color: #456658; font: 650 11px system-ui, sans-serif;
+  letter-spacing: .02em; line-height: 1.5;
+}
+.wordforge-app #typing-status { color: #305442; }
+.wordforge-app .typing-mission b { color: #775817; }
+.wordforge-app .typing-round-actions {
+  display: flex; flex-wrap: wrap; gap: 9px; align-items: center;
+  margin: 20px 0; padding: 0;
+}
+.wordforge-app .typing-round-actions button {
+  min-width: 118px; min-height: 46px; padding: 10px 17px;
+  border: 1px solid #789082; border-radius: 8px;
+  color: #1e4a38; background: #fffdf8; font-weight: 750;
+  font-size: 12px; letter-spacing: .06em;
+}
+.wordforge-app .typing-round-actions button:hover { background: #e4eadf; }
+.wordforge-app .typing-round-actions .typing-start,
+.wordforge-app .typing-round-actions [data-action="resume-round"] {
+  color: #fffaf0; background: #1f5944; border-color: #1f5944;
+}
+.wordforge-app .typing-round-actions .typing-start:hover,
+.wordforge-app .typing-round-actions [data-action="resume-round"]:hover { background: #154633; }
+.wordforge-app .typing-round-actions [hidden],
+.wordforge-app .typing-footer [hidden] { display: none; }
+.wordforge-app .typing-energy { height: 5px; border: none; border-radius: 999px; background: #d5dfd5; margin: 0 0 26px; }
+.wordforge-app .typing-energy i { background: #b78c3a; box-shadow: none; }
+.wordforge-app .typing-passage { color: #61776a; font-size: clamp(1.45rem, 3.5vw, 2.45rem); line-height: 1.48; min-height: 115px; }
+.wordforge-app .typing-char.correct { color: #1e6045; }
+.wordforge-app .typing-char.incorrect { color: #a83835; background: #f7e4df; }
+.wordforge-app .typing-char.current { color: #18372c; }
+.wordforge-app .typing-cursor { background: #e2c88b; outline: 1px solid #9e7537; }
+.wordforge-app .typing-stage.round-paused .typing-passage-wrap { opacity: .55; }
+.wordforge-app .typing-input-label { margin-top: 24px; color: #365746; font: 650 12px system-ui, sans-serif; letter-spacing: 0; }
+.wordforge-app .typing-input {
+  min-height: 50px; border: 1px solid #90a797; border-radius: 8px;
+  background: #fffdf8; color: #173b2c; caret-color: #174e39;
+}
+.wordforge-app .typing-input[readonly] { background: #e9ece5; }
+.wordforge-app .typing-tip,
+.wordforge-app .typing-footer { color: #4c6758; font: 12px/1.5 system-ui, sans-serif; letter-spacing: 0; }
+.wordforge-app .typing-restart { border-radius: 8px; background: #1f5944; color: #fffaf0; }
+.wordforge-app .typing-restart:hover { background: #154633; filter: none; }
+.wordforge-app .typing-result { border-color: #d5ddd3; color: #274b38; }
+.wordforge-app .typing-result strong { color: #1f5944; }
+.wordforge-app .typing-rank-mark.active { border-color: #bf9144; background: #bf9144; box-shadow: none; }
+.wordforge-app .typing-result-stats { background: #d5ddd3; border-color: #d5ddd3; }
+.wordforge-app .typing-result-stats > span { background: #fffdf8; }
+.wordforge-app .typing-result-stats b,
+.wordforge-app .typing-vocabulary p,
+.wordforge-app .typing-review p,
+.wordforge-app .typing-adaptive-rec { color: #173d31; }
+.wordforge-app .typing-result-stats small,
+.wordforge-app .typing-adaptive-evidence,
+.wordforge-app .typing-review small { color: #466757; }
+.wordforge-app .typing-mission-result { color: #84601b; }
+.wordforge-app .typing-mission-result.complete { color: #1e6045; }
+.wordforge-app .typing-learning,
+.wordforge-app .typing-review,
+.wordforge-app .typing-adaptive { border-color: #d5ddd3; }
+.wordforge-app .typing-learning h3,
+.wordforge-app .typing-review h3,
+.wordforge-app .typing-adaptive h3 { color: #225844; }
+.wordforge-app .typing-vocabulary { background: #d5ddd3; border-color: #d5ddd3; }
+.wordforge-app .typing-vocabulary article { background: #fffdf8; }
+.wordforge-app .typing-vocabulary b,
+.wordforge-app .typing-vocabulary span { color: #765417; }
+.wordforge-app .typing-vocabulary .typing-word-sound {
+  display: inline-block; padding: 0; border-bottom: 1px dashed #9e7537;
+  color: #765417; text-align: left; font-size: 15px; font-weight: 750;
+}
+.wordforge-app .typing-vocabulary .typing-word-sound::after {
+  content: "▶"; margin-left: 8px; font-size: 10px;
+}
+.wordforge-app .typing-fun-fact { background: #e8eee7; border-color: #c4d3c7; border-left-color: #b78c3a; }
+.wordforge-app .typing-fun-fact b,
+.wordforge-app .typing-fun-fact span,
+.wordforge-app .typing-fun-fact span:last-child { color: #315745; }
+.wordforge-app .typing-adaptive-badge { color: #624714; border-color: #af9b72; }
+.wordforge-app .typing-weak-practice,
+.wordforge-app .typing-adaptive-practice,
+.wordforge-app .typing-listen { color: #1b5b44; }
+.wordforge-app button:focus-visible,
+.wordforge-app input:focus-visible,
+.wordforge-app a:focus-visible { outline: 3px solid #a57a2b; outline-offset: 3px; }
+@media (max-width: 900px) {
+  .wordforge-app .typing-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .wordforge-app .typing-daily { margin-left: 0; }
+}
+@media (max-width: 600px) {
+  .wordforge-app .app-shell { padding: 0 14px 44px; }
+  .wordforge-app .topbar { min-height: 58px; }
+  .wordforge-app .typing-page { padding-top: 26px; }
+  .wordforge-app .typing-head { margin-bottom: 18px; }
+  .wordforge-headmark { display: none; }
+  .wordforge-app .typing-head h1 { font-size: clamp(2.25rem, 10vw, 3.4rem); }
+  .wordforge-app .typing-stage { padding: 20px 16px; border-radius: 12px; }
+  .wordforge-app .typing-controls { flex-direction: row; align-items: stretch; gap: 8px; margin-bottom: 18px; padding-bottom: 14px; }
+  .wordforge-app .typing-difficulties,
+  .wordforge-app .typing-timed { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .wordforge-app .typing-difficulty,
+  .wordforge-app .typing-time-limit { padding: 8px 3px; }
+  .wordforge-app .typing-daily,
+  .wordforge-app .typing-sound { flex: 1 1 44%; }
+  .wordforge-app .typing-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin-bottom: 18px; }
+  .wordforge-app .typing-metrics span { padding: 9px 7px; font-size: 10px; }
+  .wordforge-app .typing-metrics b { font-size: 13px; overflow-wrap: anywhere; }
+  .wordforge-app .typing-mission { gap: 5px; }
+  .wordforge-app .typing-round-actions { margin: 16px 0; }
+  .wordforge-app .typing-round-actions button { flex: 1; }
+  .wordforge-app .typing-passage { font-size: clamp(1.4rem, 5.8vw, 1.8rem); min-height: 95px; }
+  .wordforge-app .typing-result-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wordforge-app .typing-char,
+  .wordforge-app .typing-cursor,
+  .wordforge-app .typing-energy i,
+  .wordforge-app .typing-result { animation: none !important; transition: none !important; }
+}

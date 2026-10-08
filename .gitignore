@@ -2,6 +2,7 @@ node_modules/
 .npm-cache/
 dist/
 *.tsbuildinfo
+.playwright-cli/
 
 # Environment / secrets
 .env
